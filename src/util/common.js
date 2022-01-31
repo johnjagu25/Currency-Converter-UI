@@ -1,8 +1,3 @@
-import { baseCurrencyCode } from "./config";
-const cloneObj = (obj) => {
-  return JSON.parse(JSON.stringify(obj));
-};
-
 export const debounce = (func, timeout = 300) => {
   let timer;
   return (...args) => {
