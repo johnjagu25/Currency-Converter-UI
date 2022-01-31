@@ -1,0 +1,16 @@
+.container {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.navBar{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    place-content: space-between;
+    padding: 20px;
+    height: 20px;
+    background: #34393e;
+    color: white;
+}

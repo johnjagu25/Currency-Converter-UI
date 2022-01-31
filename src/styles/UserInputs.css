@@ -1,0 +1,14 @@
+.userInputSection{
+    display: flex;
+    flex-direction: row;
+}
+
+.autoComplete{
+    margin-right: 20px;
+}
+
+.userCard{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

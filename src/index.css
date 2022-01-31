@@ -1,0 +1,73 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: whitesmoke !important;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+.MuiButton-containedPrimary {
+  background: #f9d858 !important;
+  color: #34393e !important;
+  font-weight: bold !important;
+}
+.MuiInputLabel-outlined.Mui-focused {
+  color: #34393e !important;
+}
+.Mui-focused fieldset {
+  border-color: #f9d858 !important;
+  border-width: 2px !important;
+}
+a.MuiTypography-root {
+  color: #34393e !important;
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: #f9d858 !important;
+}
+
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.MuiDataGrid-iconSeparator{
+  display: none !important;
+}
+
+.MuiDataGrid-columnHeaderDraggableContainer{
+  border:none;
+}
+
+.MuiDataGrid-columnHeaders {
+  background: #f9d858 !important;
+  color: #34393e !important;
+  font-weight: bold !important;
+}
+
+.apply-elevations{
+box-shadow: 0px 2px 1px -1px rgb(0 0 0 / 20%), 0px 1px 1px 0px rgb(0 0 0 / 14%), 0px 1px 3px 0px rgb(0 0 0 / 12%) !important;
+}
+
+.MuiDataGrid-main{
+  border-bottom: 1px solid lightgray;
+}
+
+.MuiDataGrid-renderingZone, .MuiDataGrid-root .MuiDataGrid-row {
+  width: 100% !important;
+}
+
+.MuiDataGrid-cell:first-child {
+  margin-left: 5px !important;
+}
+
+.MuiDataGrid-root .MuiDataGrid-columnHeader:focus,
+  .MuiDataGrid-root .MuiDataGrid-cell:focus,.MuiDataGrid-cell {
+    outline: none !important;
+  }
