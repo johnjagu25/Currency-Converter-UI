@@ -1,107 +1,130 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, {
+  Fragment,
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+} from "react";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
-import "../../styles/UserInputs.css";
+import styles from "../../styles/UserInputs.module.css";
 import { Button, CircularProgress } from "@mui/material";
 import { getCountryDetails } from "../../service/service";
-import AlertDialog from "./RateLimitAlert";
+import RateLimitDialog from "./RateLimitDialog";
 import { debounce } from "../../util/common";
 import { Box } from "@mui/system";
-import { baseCurrencyCode,amountMinValue } from "../../util/config";
+import { baseCurrencyCode, amountMinValue } from "../../util/config";
+import {
+  RESPONSE_CODE,
+  LOC_STORAGE,
+  USERINPUTS,
+} from "../../constant/constant";
 
 const trackAddedCountries = new Set();
-export function UserInputs(props) {
-  const textRef = useRef();
-  const [countryInp, upCountryData] = useState({
-    countryData: [],
-    open: false,
-    autoKey: new Date().toISOString(),
+export function UserInputs({ onAddNewCountry, onUpdateAmount }) {
+  const selCountry = useRef({
+    data: null,
   });
-
+  const [countryInp, upCountryData] = useState({
+    dataSource: [],
+    showDropdown: false,
+    autoKeyId: new Date().toISOString(),
+    searchTxt: "",
+  });
   const [amount, setAmount] = useState(1);
   const [reqLimitDialog, openReqLimitDialog] = useState(false);
-
-  const searchInpHandler = useCallback(
-    debounce((value) => {
-      getCountryDetails(value)
-        .then((response) => {
-          let data = response?.data?.countryDetails || [];
-          for (let i = data.length - 1; i >= 0; i--) {
-            let name = data[i].name;
-            if (trackAddedCountries.has(name)) {
-              data.splice(i, 1);
-            }
+  const getCtrydetails = (searchTxt) => {
+    getCountryDetails(searchTxt)
+      .then((response) => {
+        let data = response?.data?.countryDetails || [];
+        for (let i = data.length - 1; i >= 0; i--) {
+          let name = data[i].name;
+          if (trackAddedCountries.has(name)) {
+            data.splice(i, 1);
           }
-          upCountryData({ ...countryInp, open: true, countryData: data });
-        })
-        .catch((e) => {
-          if (e.code === "limit_exceeded") {
-            openReqLimitDialog(true);
-          } else {
-            upCountryData({ ...countryInp, open: true, countryData: [] });
-          }
+        }
+        upCountryData({
+          ...countryInp,
+          showDropdown: true,
+          dataSource: data,
         });
-    }, 500),
+      })
+      .catch((e) => {
+        upCountryData({ ...countryInp, showDropdown: false, dataSource: [] });
+        if (e.code === RESPONSE_CODE.LIMIT_EXCEEDED) {
+          openReqLimitDialog(true);
+        }
+      });
+  };
+  const searchInpHandler = useCallback(debounce(getCtrydetails, 500), []);
+  // unmount
+  useEffect(
+    () => () => {
+      trackAddedCountries?.clear();
+      upCountryData({});
+    },
     []
   );
 
   useEffect(() => {
-    if (!countryInp.open) {
-      upCountryData({ ...countryInp, countryData: [] });
+    if (!countryInp.showDropdown) {
+      upCountryData(() => ({ ...countryInp, dataSource: [] }));
     }
-  }, [countryInp.open]);
+  }, [countryInp.showDropdown]);
 
-  const saveSelectedDetail = ({ name, population, currency, official,baseCurrencyValue }) => {
+  const saveSelectedDetail = ({
+    name,
+    population,
+    currency,
+    official,
+    baseCurrencyValue,
+  }) => {
     try {
-      let selectedCountry = {
+      const selectedCountry = {
         name,
         population: population?.toLocaleString(),
         currency: currency[0].code,
         currencyDetails: currency,
         currencySymbol: currency?.currencySymbol,
         official,
-        baseCurrencyValue
+        baseCurrencyValue,
       };
-      sessionStorage.setItem(
-        "selectedCountry",
-        JSON.stringify(selectedCountry)
-      );
+      selCountry.current.data = selectedCountry;
     } catch (e) {}
   };
 
   const addCountry = (e) => {
-    let getSelCountry = sessionStorage.getItem("selectedCountry");
-    if (getSelCountry) {
-      const obj = JSON.parse(getSelCountry);
-      trackAddedCountries.add(obj.name);
-      props.addNewCountry(obj, amount);
+    if (selCountry.current.data) {
+      trackAddedCountries.add(selCountry.current.data.name);
+      onAddNewCountry(selCountry.current.data, amount);
+      selCountry.current.data = null;
     }
     // it's to rerender the autocomplete
-    upCountryData({ ...countryInp, autoKey: new Date().toISOString() });
+    upCountryData({ ...countryInp, autoKeyId: new Date().toISOString() });
   };
   const amtFieldChange = (amount) => {
+    onUpdateAmount(amount);
     setAmount(amount);
-    props.updateAmount(amount);
   };
   const updReqDialog = (isOpen) => {
     openReqLimitDialog(isOpen);
   };
   return (
-    <section className="userCard" style={{ display: "flex" }}>
-      <AlertDialog
-        reqLimitDialog={reqLimitDialog}
-        updReqDialog={updReqDialog}
-      ></AlertDialog>
-      <div className="userInputSection" style={{ marginBottom: "20px" }}>
+    <section className={styles.userCard}>
+      <RateLimitDialog
+        onReqLimitDialog={reqLimitDialog}
+        onUpdReqDialog={updReqDialog}
+      ></RateLimitDialog>
+      <div className={styles.userInputSection}>
         <Autocomplete
-          key={countryInp.autoKey}
-          className="autoComplete"
-          open={countryInp.open}
+          key={countryInp.autoKeyId}
+          className={styles.autoComplete}
+          open={countryInp.showDropdown}
           onOpen={() => {
-            upCountryData({ ...countryInp, open: true });
+            upCountryData({ ...countryInp, showDropdown: true });
           }}
-          noOptionsText={"No country available"}
-          onClose={() => upCountryData({ ...countryInp, open: false })}
+          noOptionsText={USERINPUTS.NO_CTRY_AVAILABLE}
+          onClose={() => upCountryData({ ...countryInp, showDropdown: false })}
           isOptionEqualToValue={(option, value) => {
             return option?.name === value?.name;
           }}
@@ -110,10 +133,11 @@ export function UserInputs(props) {
             if (value) {
               saveSelectedDetail(value);
             } else {
-              sessionStorage.removeItem("selectedCountry");
+              sessionStorage.removeItem(LOC_STORAGE.SELECTEDCOUNTRY);
             }
           }}
-          options={countryInp.countryData}
+          clearOnBlur = {true}
+          options={countryInp.dataSource}
           renderOption={(props, option) => (
             <Box key={option.name} component="li" {...props}>
               <span>
@@ -125,64 +149,61 @@ export function UserInputs(props) {
           getOptionLabel={(option) => {
             return option?.name;
           }}
-          style={{ width: 300, height: 45 }}
           renderInput={(params) => (
             <TextField
-              inputRef={textRef}
               {...params}
               label="Select Country"
               variant="outlined"
               onChange={(ev, data) => {
-                if (ev.target.value) {
-                  searchInpHandler(ev.target.value);
+                let searchTxt = ev.target.value;
+                if (searchTxt) {
+                  searchInpHandler(searchTxt);
                 }
+                upCountryData({ ...countryInp, searchTxt: searchTxt });
               }}
               InputProps={{
                 ...params.InputProps,
                 endAdornment: (
-                  <React.Fragment>
-                    {countryInp.open &&
-                    !countryInp.countryData?.length &&
-                    textRef.current.value ? (
+                  <Fragment>
+                    {
+                    !countryInp.dataSource?.length &&
+                    countryInp.searchTxt ? (
                       <CircularProgress color="inherit" size={20} />
                     ) : null}
                     {params.InputProps.endAdornment}
-                  </React.Fragment>
+                  </Fragment>
                 ),
               }}
             />
           )}
         />
         <Button
-          style={{ width: 150, height: 45 }}
+          className={styles.addCountry}
           onClick={() => {
             addCountry();
           }}
           variant="contained"
         >
-          Add Country
+          {USERINPUTS.ADD_COUNTRY}
         </Button>
       </div>
       <TextField
-        style={{
-          width: 470,
-          height: 45,
-          marginTop: "10px",
-          marginBottom: "10px",
-        }}
+        className={styles.amountField}
         min="0.01"
         id="outlined-number"
-        label={`Enter Amount (${baseCurrencyCode})`}
+        label={`${USERINPUTS.ENTER_AMOUNT} (${baseCurrencyCode})`}
         type="number"
         variant="outlined"
         value={amount}
-        onKeyPress={(event) => {
-          if (!/[0-9]\.?/.test(event.key)&& event.key !== '.') {
-            event.preventDefault();
+        onKeyPress={(e) => {
+          if (!/^\d+|\.$/.test(e.key)) {
+            e.preventDefault();
           }
         }}
         onBlur={(e) =>
-          amtFieldChange(e.target.value < amountMinValue ? amountMinValue : e.target.value)
+          amtFieldChange(
+            e.target.value < amountMinValue ? amountMinValue : e.target.value
+          )
         }
         onChange={(e) => amtFieldChange(e.target.value)}
       />

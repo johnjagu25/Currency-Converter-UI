@@ -5,22 +5,23 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import { rateLimit } from "../../util/commonstyle";
+import { BTN, RATE_LIMIT_DIALOG } from "../../constant/constant";
 
-export default function AlertDialog(props) {
+export default function RateLimitDialog({onUpdReqDialog,onReqLimitDialog}) {
   const handleClose = () => {
-    props.updReqDialog(false);
+    onUpdReqDialog(false);
   };
 
   return (
-      <Dialog open={props.reqLimitDialog} onClose={handleClose}>
+      <Dialog open={onReqLimitDialog} onClose={handleClose}>
         <DialogContent>
           <DialogContentText>
-            <div style={rateLimit.title} >Oh no, you've exceeded your request limit!</div>
-            <div style={rateLimit.msg}>Please take a minute break and come back</div>
+            <div style={rateLimit.title}>{RATE_LIMIT_DIALOG.title}</div>
+            <div style={rateLimit.msg}>{RATE_LIMIT_DIALOG.msg}</div>
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Close</Button>
+          <Button onClick={handleClose}>{BTN.CLOSE}</Button>
         </DialogActions>
       </Dialog>
   );

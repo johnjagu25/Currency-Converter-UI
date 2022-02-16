@@ -9,35 +9,50 @@ import Container from "@mui/material/Container";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { loginUser } from "../../service/service";
+import {
+  LOC_STORAGE,
+  RESPONSE_CODE,
+  UNAMEPWDMISSING,
+} from "../../constant/constant";
+import { useEffect } from "react";
 
-export default function Login(props) {
+export default function Login({ notify }) {
   const [errorMsg, setError] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    return () => {
+      setError('');
+    };
+  }, []);
 
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const userName = data.get("username");
-    let passWord = data.get("password");
+    const passWord = data.get("password");
+    if (!(userName && passWord)) {
+      setError(UNAMEPWDMISSING);
+      return false;
+    }
     loginUser(userName, passWord)
       .then((response) => {
-        if (response?.code === "logged_in") {
-          if(response.message){
-            props.notify(response.message)
-          }      
-          sessionStorage.setItem("userName", userName);
-          sessionStorage.setItem("token", response.token);
-          navigate("/exchange");           
+        if (response?.code === RESPONSE_CODE.LOGGED_IN) {
+          if (response.message) {
+            notify(response.message);
+          }
+          sessionStorage.setItem(LOC_STORAGE.USERNAME, userName);
+          sessionStorage.setItem(LOC_STORAGE.TOKEN, response.token);
+          navigate("/exchange");
           setError("");
         } else {
           setError(response.message);
         }
-
       })
       .catch((error) => {
         let msg = error?.message || "Something went wrong";
         setError(msg);
-        props.notify(msg)
+        notify(msg);
       });
   };
   const containerStyle = {
@@ -58,16 +73,16 @@ export default function Login(props) {
           Sign In
         </Typography>
 
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+        <Box component="form"  onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
           <TextField
             margin="normal"
             required
             fullWidth
-            id="userName"
+            id="username"
             label="Username"
             name="username"
-            autoComplete="chrome-off"
             autoFocus
+            autoComplete="new-username"
           />
           <TextField
             margin="normal"
@@ -77,7 +92,7 @@ export default function Login(props) {
             label="Password"
             type="password"
             id="password"
-            autoComplete="chrome-off"
+            autoComplete="new-password"
           />
           <Button
             type="submit"
@@ -102,6 +117,6 @@ export default function Login(props) {
           </Grid>
         </Box>
       </Box>
-      </Container>
+    </Container>
   );
 }

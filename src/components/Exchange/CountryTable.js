@@ -2,23 +2,24 @@ import * as React from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { countryTableCss } from "../../util/commonstyle";
 import { baseCurrencyCode } from "../../util/config";
+import { COUNTRYTABLECOLUMNS } from "../../constant/constant";
 
 const columns = [
   {
-    field: "name",
-    headerName: "Country Name",
+    field: COUNTRYTABLECOLUMNS.name.field,
+    headerName: COUNTRYTABLECOLUMNS.name.headerName,
     minWidth: 170,
     sortable: false,
   },
   {
-    field: "population",
-    headerName: "Population",
+    field: COUNTRYTABLECOLUMNS.population.field,
+    headerName: COUNTRYTABLECOLUMNS.population.headerName,
     minWidth: 150,
     sortable: false,
   },
   {
-    field: "currencyDetails",
-    headerName: "Currency",
+    field: COUNTRYTABLECOLUMNS.currency.field,
+    headerName: COUNTRYTABLECOLUMNS.currency.headerName,
     minWidth: 180,
     sortable: false,
     renderCell: (cellValues) => {
@@ -30,8 +31,8 @@ const columns = [
           }}
         >
           {cellValues?.value?.length > 1 ? (
-            cellValues?.value.map((currency) => (
-              <span style={{ marginBottom: "5px" }}>
+            cellValues?.value.map((currency,index) => (
+              <span key={index} style={{ marginBottom: "5px" }}>
                 {currency.code}&nbsp;({currency.name})
               </span>
             ))
@@ -44,13 +45,13 @@ const columns = [
   },
 
   {
-    field: "amount",
-    headerName: "Converted Amount",
+    field: COUNTRYTABLECOLUMNS.amount.field,
+    headerName: COUNTRYTABLECOLUMNS.amount.headerName,
     minWidth: 180,
     sortable: false,
     renderHeader: (params) => (
       <div style={countryTableCss.convertedAmount}>
-        <span style={{fontWeight: 500}}>Converted Amount</span>
+        <span style={{ fontWeight: 500 }}>Converted Amount</span>
         <span style={countryTableCss.localCurrency}>
           ({baseCurrencyCode} to Local Currency)
         </span>
@@ -89,8 +90,7 @@ const columns = [
   },
 ];
 
-export function CountryTable(props) {
-  const dataSource = props.dataSource;
+export function CountryTable({dataSource}) {
   return (
     <div style={countryTableCss.tableStyle}>
       <div style={{ flexGrow: 1 }} className="apply-elevation">

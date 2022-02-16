@@ -1,0 +1,31 @@
+.userInputSection {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 20px;
+}
+
+.autoComplete {
+    margin-right: 20px;
+    width: 300px;
+    height: 45px;
+}
+
+.userCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.addCountry {
+    width: 150px;
+    height: 45px;
+}
+
+.amountField {
+    width: 470px;
+    height: 45px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+

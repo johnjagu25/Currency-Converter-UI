@@ -7,8 +7,9 @@ import Container from "@mui/material/Container";
 import { useState } from "react";
 import { signUpUser } from "../../service/service";
 import { useNavigate } from "react-router-dom";
+import { LOC_STORAGE,RESPONSE_CODE,UNAMEPWDREQUIRED } from "../../constant/constant";
 
-export default function SignUp(props) {
+export default function SignUp({notify}) {
   const [errorMsg, setError] = useState("");
   const navigate = useNavigate();
   const handleSubmit = (event) => {
@@ -17,18 +18,22 @@ export default function SignUp(props) {
     let userName = data.get("username");
     let passWord = data.get("password");
     let confPwd = data.get("confirmPwd");
+    if(!(userName && passWord)){
+      setError(UNAMEPWDREQUIRED);
+      return false;
+    }
     if (userName && confPwd === passWord) {
       signUpUser(userName, passWord)
         .then((response) => {
-          sessionStorage.setItem("userName", userName);
-          sessionStorage.setItem("token", response.token);
-          if(response.code === 'success'){
-            props.notify(response.message)
+          sessionStorage.setItem(LOC_STORAGE.USERNAME, userName);
+          sessionStorage.setItem(LOC_STORAGE.TOKEN, response.token);
+          if(response.code === RESPONSE_CODE.SUCCESS){
+            notify(response.message)
           }     
           navigate("/exchange");             
         }).catch((error) => {
           if(error?.message){
-            props.notify(error.message)
+            notify(error.message)
           }          
         });
     } else {
